@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Blanka&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(to bottom, #000000, #FFA500);
+            color: #FFFFFF;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: transparent; /* Transparent background */
+            z-index: 1000;
+            box-shadow: none; /* Remove box shadow */
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .navbar-logo {
+            color: #FFFFFF; /* White font */
+            font-size: 1.3rem;
+            cursor: crosshair;
+            font-weight: bold;
+            padding-bottom: 2px;
+            font-family: 'Blanka', cursive;
+            text-decoration: none;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); /* White glow */
+            letter-spacing: 1.1px;
+            transition: all 0.09s ease;
+        }
+
+        .navbar-logo:hover {
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6); /* Enhanced glow on hover */
+            transform: scale(1.05); /* Slight zoom effect */
+        }
+
+        .navbar-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar-item {
+            margin-left: 20px;
+        }
+
+        .navbar-link {
+            color: #FFFFFF; /* White font */
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); /* White glow */
+        }
+
+        .navbar-link:hover {
+            background: rgba(255, 255, 255, 0.1); /* Light hover effect */
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); /* White glow on hover */
+        }
+
+        /* Hamburger Menu for Mobile */
+        .navbar-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .bar {
+            width: 25px;
+            height: 3px;
+            background: #FFFFFF; /* White bars */
+            margin: 4px 0;
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive Navbar */
+        @media (max-width: 768px) {
+            .navbar-menu {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                background: rgba(18, 17, 17, 0.977); /* Semi-transparent black for mobile */
+            }
+
+            .navbar-menu.active {
+                display: flex;
+            }
+
+            .navbar-item {
+                margin: 10px 0;
+            }
+
+            .navbar-toggle {
+                display: flex;
+            }
+        }
+
+        /* Main Content */
+        .container {
+            position: relative;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            margin: 120px auto 40px; /* Adjusted for navbar */
+            padding: 20px;
+            flex: 1;
+        }
+
+        /* Glowing Border Animation */
+        .animated-border-box, .animated-border-box-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            border-radius: 10px;
+        }
+
+        .animated-border-box-glow {
+            filter: blur(25px);
+        }
+
+        .animated-border-box:before, .animated-border-box-glow:before {
+            content: '';
+            z-index: -2;
+            text-align: center;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(0deg);
+            position: absolute;
+            width: 99999px;
+            height: 99999px;
+            background-repeat: no-repeat;
+            background-position: 0 0;
+            background-image: conic-gradient(rgba(0,0,0,0), #f1f394, rgba(0,0,0,0) 25%);
+            animation: rotate 4s linear infinite;
+        }
+
+        .animated-border-box:after {
+            content: '';
+            position: absolute;
+            z-index: -1;
+            left: 5px;
+            top: 5px;
+            width: calc(100% - 10px);
+            height: calc(100% - 10px);
+            background: rgba(18, 17, 17, 0.977);
+            border-radius: 7px;
+        }
+
+        @keyframes rotate {
+            100% {
+                transform: translate(-50%, -50%) rotate(1turn);
+            }
+        }
+
+        /* Content Inside the Black Box */
+        .content {
+            position: relative;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        h1 {
+            color: #FFD700;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+            margin-bottom: 30px;
+        }
+
+        .upload-wrapper {
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .upload-container {
+            border: 2px dashed rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            padding: 40px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-container:hover {
+            border-color: #FFD700;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-container.dragover {
+            animation: pulse-glow 1.5s infinite;
+            border-color: #FFD700;
+        }
+
+        .custom-upload {
+            position: relative;
+            display: inline-block;
+        }
+
+        .custom-upload input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .upload-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 28px;
+            background: rgba(255, 215, 0, 0.05);
+            border: 2px solid #FFD700;
+            border-radius: 8px;
+            color: #FFD700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-label:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .upload-icon {
+            width: 24px;
+            height: 24px;
+            filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.5));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        input[type="submit"] {
+            background: linear-gradient(to right, #FFA500, #FFD700);
+            color: #000;
+            font-weight: bold;
+            border: 1px solid #FFD700;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        input[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 165, 0, 0.3);
+        }
+
+        .selected-file {
+            margin-top: 15px;
+            color: #FFFFFF;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .selected-file.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Image Preview Styles with Glow Around Image */
+        .preview-container {
+            margin-top: 20px;
+            position: relative;
+            width: 100%;
+            height: 200px; /* Fixed height for consistency */
+            display: none;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px; /* Rounded corners */
+            background: transparent; /* No background */
+            overflow: hidden;
+        }
+
+        .preview-container img {
+            max-width: 95%; /* Slightly smaller than container */
+            max-height: 95%;
+            border-radius: 8px; /* Rounded corners */
+            object-fit: cover; /* Ensure images fit perfectly */
+            transition: transform 0.3s ease; /* Smooth hover effect */
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); /* Glow around the image */
+        }
+
+        .preview-container img:hover {
+            transform: scale(1.05); /* Slight zoom effect on hover */
+            box-shadow: 0 0 20px rgba(21, 55, 169, 0.8); /* Enhanced glow on hover */
+        }
+
+        /* Pulse Glow Animation */
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.2); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 215, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+
+        /* File Size Warning and Progress Bar */
+        .file-size-warning {
+            font-size: 0.8em;
+            color: #FFD700;
+            margin-top: 10px;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+        }
+
+        .progress-container {
+            margin-top: 15px;
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(to right, #FFA500, #FFD700);
+            transition: width 0.2s ease;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: transparent; /* Transparent background */
+            color: #FFFFFF; /* White text */
+            padding: 20px 0;
+            text-align: center;
+            margin-top: auto; /* Ensures footer sticks to the bottom */
+            border-top: 1px solid rgba(255, 255, 255, 0.1); /* Soft gradient border */
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .footer-social h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); /* Subtle glow */
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px; /* Increased gap for better spacing */
+        }
+
+        .social-icon {
+            color: #FFFFFF; /* White icons */
+            font-size: 1.8rem; /* Slightly larger icons */
+            transition: all 0.3s ease;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); /* Subtle glow */
+        }
+
+        .social-icon:hover {
+            transform: translateY(-3px);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8); /* Enhanced glow on hover */
+        }
+
+        .footer-copyright {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #FFFFFF; /* White text */
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); /* Subtle glow */
+            transition: all 0.3s ease;
+        }
+
+        .footer-copyright:hover {
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8); /* Enhanced glow on hover */
+        }
+
+        /* Responsive Footer */
+        @media (max-width: 768px) {
+            .footer-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .social-icons {
+                gap: 15px; /* Adjusted gap for smaller screens */
+            }
+        }
+
+        /* Pop-up Modal Styles */
+        .popup-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+        }
+
+        .popup-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15% auto;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            animation: fadeInScale 0.3s ease-in-out;
+        }
+
+        .close-btn {
+            color: #FFFFFF;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #FFD700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+
+        /* Loader Styles */
+        /* From Uiverse.io by JaydipPrajapati1910 */ 
+        .loader {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        bottom: 50%;
+        right: 50%;
+        z-index: 1001;
+        width: 160px;
+        height: 160px;
+        border: 4px solid #282828;
+        overflow: hidden;
+        border-radius: 50%;
+        box-shadow: -5px -5px 5px rgba(255, 255, 255, 0.1),
+            10px 10px 10px rgba(0, 0, 0, 0.4),
+            inset -5px -5px 5px rgba(255, 255, 255, 0.2),
+            inset 10px 10px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .loader:before {
+        content: "";
+        position: absolute;
+        top: 25px;
+        left: 25px;
+        right: 25px;
+        bottom: 25px;
+        z-index: 10;
+        background: #212121;
+        border-radius: 50%;
+        border: 2px solid #292929;
+        box-shadow: inset -2px -2px 5px rgba(255, 255, 255, 0.2),
+            inset 3px 3px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .loader span {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-image: linear-gradient(
+            -225deg,
+            #ff7402 0%,
+            #ffe700 50%,
+            #fff55e 100%
+        );
+        filter: blur(20px);
+        z-index: -1;
+        animation: animate 0.5s linear infinite;
+        }
+
+        @keyframes animate {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+        }
+
+  
+
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="#" class="navbar-logo">Tri Matic</a>
+            <div class="navbar-toggle" id="mobile-menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+            <ul class="navbar-menu">
+                <li class="navbar-item">
+                    <a href="#" class="navbar-link">Home</a>
+                </li>
+                <li class="navbar-item">
+                    <a href="#" class="navbar-link" id="aboutBtn">About</a>
+                </li>
+                <li class="navbar-item">
+                    <a href="#" class="navbar-link" id="servicesBtn">Services</a>
+                </li>
+                <li class="navbar-item">
+                    <a href="#" class="navbar-link">Contact</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Glowing Border -->
+        <div class="animated-border-box-glow"></div>
+        <div class="animated-border-box"></div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <h1>Upload an Image</h1>
+            <form action="upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                <div class="upload-wrapper">
+                    <div class="upload-container" id="dropZone">
+                        <div class="custom-upload">
+                            <input type="file" name="file" id="fileInput" accept="image/*" required>
+                            <label class="upload-label" for="fileInput">
+                                <svg class="upload-icon" viewBox="0 0 24 24">
+                                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                                </svg>
+                                Choose File
+                            </label>
+                        </div>
+                        <div class="selected-file" id="fileName"></div>
+                        <!-- File Size Warning -->
+                        <div class="file-size-warning">Max file size: 5MB</div>
+                        <!-- Progress Bar -->
+                        <div class="progress-container" id="progressContainer">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                        <!-- Image Preview -->
+                        <div class="preview-container" id="previewContainer">
+                            <img id="previewImage" src="#" alt="Image Preview">
+                        </div>
+                    </div>
+                </div>
+                <input type="submit" value="Upload Image">
+            </form>
+        </div>
+    </div>
+
+    <!-- Pop-up Modal -->
+    <div id="popupModal" class="popup-modal">
+        <div class="popup-content">
+            <span class="close-btn" id="closePopup">&times;</span>
+            <div id="popupText"></div>
+        </div>
+    </div>
+
+    <div class="loader">
+        <span></span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" id="downside">
+        <div class="footer-container">
+            <!-- Follow Us Section -->
+            <div class="footer-social">
+                <h3>Contact Us</h3>
+                <div class="social-icons">
+                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+        <!-- Copyright -->
+        <div class="footer-copyright">
+            <p>&copy; 2023 Nikhil Kumar. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar Toggle for Mobile
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navbarMenu = document.querySelector('.navbar-menu');
+
+        mobileMenu.addEventListener('click', () => {
+            navbarMenu.classList.toggle('active');
+        });
+
+        // Drag-and-Drop and File Input Logic
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const dropZone = document.querySelector('.upload-container');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const uploadForm = document.getElementById('uploadForm');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+            dropZone.querySelector('.upload-label').textContent = 'Drop the file here';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+            dropZone.querySelector('.upload-label').textContent = 'Choose File';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            dropZone.querySelector('.upload-label').textContent = 'Choose File';
+
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (file && file.type.startsWith('image/')) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size exceeds 5MB. Please choose a smaller file.');
+                    fileInput.value = '';
+                    resetPreview();
+                    return;
+                }
+                fileName.textContent = `Selected: ${file.name}`;
+                fileName.classList.add('show');
+
+                previewContainer.style.display = 'flex';
+                previewImage.src = URL.createObjectURL(file);
+                previewImage.alt = file.name;
+
+                const uploadContainer = document.querySelector('.upload-container');
+                uploadContainer.style.height = 'auto';
+            } else {
+                alert('Please select a valid image file.');
+                fileInput.value = '';
+                resetPreview();
+            }
+        }
+
+        function resetPreview() {
+            fileName.textContent = '';
+            fileName.classList.remove('show');
+            previewContainer.style.display = 'none';
+            previewImage.src = '#';
+            previewImage.alt = '';
+            progressContainer.style.display = 'none';
+            progressBar.style.width = '0%';
+
+            const uploadContainer = document.querySelector('.upload-container');
+            uploadContainer.style.height = '';
+        }
+
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!fileInput.files.length) {
+                alert('Please select a file to upload.');
+                return;
+            }
+
+            const formData = new FormData(uploadForm);
+            const xhr = new XMLHttpRequest();
+
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            xhr.upload.addEventListener('progress', function(event) {
+                if (event.lengthComputable) {
+                    const percentComplete = (event.loaded / event.total) * 100;
+                    progressBar.style.width = percentComplete + '%';
+                }
+            });
+
+            xhr.addEventListener('load', function() {
+                if (xhr.status === 200) {
+                    window.location.href = 'result.jsp';
+                } else {
+                    alert('Upload failed. Please try again.');
+                    resetPreview();
+                }
+            });
+
+            xhr.addEventListener('error', function() {
+                alert('An error occurred during upload.');
+                resetPreview();
+            });
+
+            xhr.open('POST', 'upload', true);
+            xhr.send(formData);
+        });
+
+        // Pop-up Modal Logic
+        const aboutBtn = document.getElementById('aboutBtn');
+        const servicesBtn = document.getElementById('servicesBtn');
+        const popupModal = document.getElementById('popupModal');
+        const closePopup = document.getElementById('closePopup');
+        const popupText = document.getElementById('popupText');
+
+        aboutBtn.addEventListener('click', () => {
+            popupText.innerHTML = '<h2>About Us</h2><p>This is the About section content.</p>';
+            popupModal.style.display = 'block';
+        });
+
+        servicesBtn.addEventListener('click', () => {
+            popupText.innerHTML = '<h2>Our Services</h2><p>This is the Services section content.</p>';
+            popupModal.style.display = 'block';
+        });
+
+        closePopup.addEventListener('click', () => {
+            popupModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target == popupModal) {
+                popupModal.style.display = 'none';
+            }
+        });
+
+        // Loader Logic
+        const loader = document.querySelector('.loader');
+        window.addEventListener('load', () => {
+            loader.style.display = 'block';
+            setTimeout(() => {
+                loader.style.display = 'none';
+            },10000);
+            
+        });
+    </script>
+</body>
+</html>
